@@ -1,0 +1,96 @@
+/*
+ * =====================================================================
+ * 环境配置 — nf-core/rnaseq 本地 PBS 注入模式 (全本地工具调用)
+ * =====================================================================
+ */
+
+process {
+    executor = 'sge'
+
+    // 映射逻辑：将 softwaredb.config 中的 params 路径映射到任务的 PATH 中
+    // 注意：这里使用 closure 以延迟解析 params 变量
+    beforeScript = {
+        """
+        # --- 动态构建本地工具箱 ---
+        mkdir -p .local_bin
+        
+        create_tool_link() {
+            local tool_path="\$1"
+            local name="\$2"
+            if [[ -f "\$tool_path" ]]; then
+                if [[ "\$tool_path" == *.jar ]]; then
+                    # 为 Jar 包文件创建 Shell 包装器
+                    echo "#!/bin/bash" > .local_bin/\$name
+                    echo "${params.java} -jar \$tool_path \\"\$@\\"" >> .local_bin/\$name
+                    chmod +x .local_bin/\$name
+                else
+                    # 创建软链接
+                    ln -sf "\$tool_path" .local_bin/\$name
+                    # 如果是 .py 脚本且目标不带 .py，则额外创建一个不带后缀的名字
+                    if [[ "\$tool_path" == *.py && "\$name" != *.py ]]; then
+                         ln -sf "\$tool_path" .local_bin/\$(basename "\$tool_path")
+                    fi
+                fi
+            fi
+        }
+
+        # 核心工具映射（全面覆盖 softwaredb.config 中的定义）
+        ${params.fastp ? "create_tool_link '${params.fastp}' fastp" : ""}
+        ${params.samtools ? "create_tool_link '${params.samtools}' samtools" : ""}
+        ${params.STAR ? "create_tool_link '${params.STAR}' STAR" : ""}
+        ${params.STAR ? "create_tool_link '${params.STAR}' star" : ""}
+        ${params.salmon ? "create_tool_link '${params.salmon}' salmon" : ""}
+        ${params.multiqc ? "create_tool_link '${params.multiqc}' multiqc" : ""}
+        ${params.gffread ? "create_tool_link '${params.gffread}' gffread" : ""}
+        ${params.fastqc ? "create_tool_link '${params.fastqc}' fastqc" : ""}
+        ${params.gatk ? "create_tool_link '${params.gatk}' gatk" : ""}
+        ${params.bam_stat ? "create_tool_link '${params.bam_stat}' bam_stat.py" : ""}
+        ${params.python ? "create_tool_link '${params.python}' python" : ""}
+        ${params.python ? "create_tool_link '${params.python}' python3" : ""}
+        ${params.Rscript ? "create_tool_link '${params.Rscript}' Rscript" : ""}
+        ${params.java ? "create_tool_link '${params.java}' java" : ""}
+        ${params.bwa ? "create_tool_link '${params.bwa}' bwa" : ""}
+        ${params.seqkit ? "create_tool_link '${params.seqkit}' seqkit" : ""}
+        ${params.fq ? "create_tool_link '${params.fq}' fq" : ""}
+        ${params.cutadapt ? "create_tool_link '${params.cutadapt}' cutadapt" : ""}
+        ${params.sambamba ? "create_tool_link '${params.sambamba}' sambamba" : ""}
+        ${params.bamdst ? "create_tool_link '${params.bamdst}' bamdst" : ""}
+        
+        # [新增] rnaseq 核心工具映射
+        ${params.stringtie ? "create_tool_link '${params.stringtie}' stringtie" : ""}
+        ${params.featureCounts ? "create_tool_link '${params.featureCounts}' featureCounts" : ""}
+        ${params.bedtools ? "create_tool_link '${params.bedtools}' bedtools" : ""}
+        ${params.bedClip ? "create_tool_link '${params.bedClip}' bedClip" : ""}
+        ${params.bedGraphToBigWig ? "create_tool_link '${params.bedGraphToBigWig}' bedGraphToBigWig" : ""}
+        ${params.qualimap ? "create_tool_link '${params.qualimap}' qualimap" : ""}
+        ${params.trim_galore ? "create_tool_link '${params.trim_galore}' trim_galore" : ""}
+        ${params.gtf2bed ? "create_tool_link '${params.gtf2bed}' gtf2bed" : ""}
+
+# --- 针对 Picard 的特殊包装器处理 ---
+        ${params.picard ? """
+        if [[ -f "${params.picard}" ]]; then
+            # 创建 picard 包装脚本，明确指定 java 路径和 jar 包路径
+            cat << 'EOF' > .local_bin/picard
+#!/bin/bash
+exec ${params.java} -jar ${params.picard} "\$@"
+EOF
+            chmod +x .local_bin/picard
+            # 兼容大写调用
+            ln -sf picard .local_bin/Picard
+        fi
+        """ : ""}
+        # 特殊逻辑：寻找 getchromsizes 等脚本
+        if [[ -f "${projectDir}/bin/gtf2bed" ]]; then
+             ln -sf "${projectDir}/bin/gtf2bed" .local_bin/gtf2bed
+        fi
+
+        # 注入 PATH
+        export PATH="\$PWD/.local_bin:\$PATH"
+        """.stripIndent()
+    }
+}
+
+// 强制关闭 nf-core 默认要求的所有的容器引擎
+docker.enabled      = false
+singularity.enabled = false
+conda.enabled       = false
