@@ -1,0 +1,40 @@
+sample,fastq_1,fastq_2,condition,library_prep,seq_protocol,subject_id,batch,strandedness
+# ─────────────────────────────────────────────────────────────────────────────────
+# 实验设计: 2(捕获方法) × 2(测序方案) × 3(生物样本) = 12 样本
+#
+# 列说明:
+#   sample        - 样品唯一标识符
+#   fastq_1/2     - FASTQ 绝对路径 (.gz)
+#   condition     - 生物学条件: Human_Lung | Negative_control
+#   library_prep  - 文库制备方法: rRNA_depletion | polyA_selection
+#   seq_protocol  - 测序方案: unstranded | stranded
+#   subject_id    - 供体/文库来源 ID（用于配对分析 ~subject_id + ...）
+#   batch         - 测序批次
+#   strandedness  - Nextflow 内部参数: unstranded | auto
+#                   (链特样本建议先用 auto，RSeQC 自动判断 forward/reverse)
+#
+# DESeq2 设计公式参考:
+#   比较捕获方法(Lung中):   ~seq_protocol + library_prep
+#   比较测序方案(Lung中):   ~library_prep + seq_protocol
+#   全因素配对:             ~subject_id + library_prep + seq_protocol
+# ─────────────────────────────────────────────────────────────────────────────────
+
+# ── L01: rRNA去除 + 普通RNA-seq ──────────────────────────────────────────────────
+CUDI57,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L01-CUDI57/JZ26058704-R-PL260320-CN002696-S01-R01-L01-CUDI57_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L01-CUDI57/JZ26058704-R-PL260320-CN002696-S01-R01-L01-CUDI57_combined_R2.fastq.gz,Human_Lung,rRNA_depletion,unstranded,CN002696_R01,batch1,unstranded
+CUDI58,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L01-CUDI58/JZ26058704-R-PL260320-CN002696-S01-R02-L01-CUDI58_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L01-CUDI58/JZ26058704-R-PL260320-CN002696-S01-R02-L01-CUDI58_combined_R2.fastq.gz,Human_Lung,rRNA_depletion,unstranded,CN002696_R02,batch1,unstranded
+CUDI59,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L01-CUDI59/JZ26058704-R-PL260320-CN002697-S01-R01-L01-CUDI59_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L01-CUDI59/JZ26058704-R-PL260320-CN002697-S01-R01-L01-CUDI59_combined_R2.fastq.gz,Negative_control,rRNA_depletion,unstranded,CN002697_R01,batch1,unstranded
+
+# ── L02: rRNA去除 + 链特RNA-seq ──────────────────────────────────────────────────
+CUDI60,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L02-CUDI60/JZ26058704-R-PL260320-CN002696-S01-R01-L02-CUDI60_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L02-CUDI60/JZ26058704-R-PL260320-CN002696-S01-R01-L02-CUDI60_combined_R2.fastq.gz,Human_Lung,rRNA_depletion,stranded,CN002696_R01,batch1,auto
+CUDI61,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L02-CUDI61/JZ26058704-R-PL260320-CN002696-S01-R02-L02-CUDI61_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L02-CUDI61/JZ26058704-R-PL260320-CN002696-S01-R02-L02-CUDI61_combined_R2.fastq.gz,Human_Lung,rRNA_depletion,stranded,CN002696_R02,batch1,auto
+CUDI62,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L02-CUDI62/JZ26058704-R-PL260320-CN002697-S01-R01-L02-CUDI62_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L02-CUDI62/JZ26058704-R-PL260320-CN002697-S01-R01-L02-CUDI62_combined_R2.fastq.gz,Negative_control,rRNA_depletion,stranded,CN002697_R01,batch1,auto
+
+# ── L03: polyA选择 + 普通RNA-seq ─────────────────────────────────────────────────
+CUDI63,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L03-CUDI63/JZ26058704-R-PL260320-CN002696-S01-R01-L03-CUDI63_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L03-CUDI63/JZ26058704-R-PL260320-CN002696-S01-R01-L03-CUDI63_combined_R2.fastq.gz,Human_Lung,polyA_selection,unstranded,CN002696_R01,batch1,unstranded
+CUDI64,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L03-CUDI64/JZ26058704-R-PL260320-CN002696-S01-R02-L03-CUDI64_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L03-CUDI64/JZ26058704-R-PL260320-CN002696-S01-R02-L03-CUDI64_combined_R2.fastq.gz,Human_Lung,polyA_selection,unstranded,CN002696_R02,batch1,unstranded
+CUDI49,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L03-CUDI49/JZ26058704-R-PL260320-CN002697-S01-R01-L03-CUDI49_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L03-CUDI49/JZ26058704-R-PL260320-CN002697-S01-R01-L03-CUDI49_combined_R2.fastq.gz,Negative_control,polyA_selection,unstranded,CN002697_R01,batch1,unstranded
+
+# ── L04: polyA选择 + 链特RNA-seq ─────────────────────────────────────────────────
+CUDI50,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L04-CUDI50/JZ26058704-R-PL260320-CN002696-S01-R01-L04-CUDI50_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R01-L04-CUDI50/JZ26058704-R-PL260320-CN002696-S01-R01-L04-CUDI50_combined_R2.fastq.gz,Human_Lung,polyA_selection,stranded,CN002696_R01,batch1,auto
+CUDI51,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L04-CUDI51/JZ26058704-R-PL260320-CN002696-S01-R02-L04-CUDI51_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002696-S01-R02-L04-CUDI51/JZ26058704-R-PL260320-CN002696-S01-R02-L04-CUDI51_combined_R2.fastq.gz,Human_Lung,polyA_selection,stranded,CN002696_R02,batch1,auto
+CUDI52,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L04-CUDI52/JZ26058704-R-PL260320-CN002697-S01-R01-L04-CUDI52_combined_R1.fastq.gz,/mnt/gpfs/Dataset/03.standard_seqdata/RawData/GeneMind/R-PL260320/Sample_JZ26058704-R-PL260320-CN002697-S01-R01-L04-CUDI52/JZ26058704-R-PL260320-CN002697-S01-R01-L04-CUDI52_combined_R2.fastq.gz,Negative_control,polyA_selection,stranded,CN002697_R01,batch1,auto
