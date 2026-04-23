@@ -25,7 +25,7 @@ process STAR_GENOMEGENERATE {
     if (args_list.contains('--genomeSAindexNbases')) {
         """
         mkdir star
-        ${params.STAR} \\
+        STAR \\
             --runMode genomeGenerate \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
@@ -36,18 +36,18 @@ process STAR_GENOMEGENERATE {
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
-            star: \$(${params.STAR} --version | sed -e "s/STAR_//g")
-            samtools: \$(echo \$(${params.samtools} --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+            star: \$(STAR --version | sed -e "s/STAR_//g")
+            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
             gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
         END_VERSIONS
         """
     } else {
         """
-        ${params.samtools} faidx $fasta
+        samtools faidx $fasta
         NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
 
         mkdir star
-        ${params.STAR} \\
+        STAR \\
             --runMode genomeGenerate \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
@@ -59,8 +59,8 @@ process STAR_GENOMEGENERATE {
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
-            star: \$(${params.STAR} --version | sed -e "s/STAR_//g")
-            samtools: \$(echo \$(${params.samtools} --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+            star: \$(STAR --version | sed -e "s/STAR_//g")
+            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
             gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
         END_VERSIONS
         """

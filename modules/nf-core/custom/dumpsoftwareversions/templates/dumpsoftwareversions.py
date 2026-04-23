@@ -58,37 +58,21 @@ def main():
     }
 
     with open("$versions") as f:
-        yaml_content = f.read()
-
-    # Quote unquoted values containing colons to prevent YAML parsing errors
-    import re
-    import json
-    cleaned_yaml = []
-    for line in yaml_content.splitlines():
-        if line.startswith("    ") and ":" in line[4:]:
-            parts = line.split(":", 1)
-            key = parts[0]
-            val = parts[1].strip()
-            if val and not (val.startswith("'") or val.startswith('"')):
-                line = f"{key}: {json.dumps(val)}"
-        cleaned_yaml.append(line)
-
-    versions_by_process = yaml.load("\\n".join(cleaned_yaml), Loader=yaml.BaseLoader) | versions_this_module
+        versions_by_process = yaml.load(f, Loader=yaml.BaseLoader) | versions_this_module
 
     # aggregate versions by the module name (derived from fully-qualified process name)
     versions_by_module = {}
     for process, process_versions in versions_by_process.items():
         module = process.split(":")[-1]
-        if module not in versions_by_module:
-            versions_by_module[module] = {}
-
-        for tool, version in process_versions.items():
-            # Skip versions that are actually error messages
-            if "未找到命令" in version or "not found" in version.lower() or "行" in version:
-                continue
-
-            if tool not in versions_by_module[module]:
-                versions_by_module[module][tool] = version
+        try:
+            if versions_by_module[module] != process_versions:
+                raise AssertionError(
+                    "We assume that software versions are the same between all modules. "
+                    "If you see this error-message it means you discovered an edge-case "
+                    "and should open an issue in nf-core/tools. "
+                )
+        except KeyError:
+            versions_by_module[module] = process_versions
 
     versions_by_module["Workflow"] = {
         "Nextflow": "$workflow.nextflow.version",

@@ -1,6 +1,6 @@
 # Input and Output
-input: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq-3.12.0/assets/samplesheet_nfcore.csv"
-outdir: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq-3.12.0/results/20240415"
+input: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq_subsequent/assets/samplesheet_nfcore.csv"
+outdir: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq_subsequent/results/20260423"
 
 # Genome Resources
 fasta: "/mnt/gpfs/Dataset/05.genome/hg38/hg38.fa"
@@ -16,12 +16,3 @@ aligner: "star_salmon"
 # QC
 skip_qc: false
 skip_multiqc: false
-
-# Advanced Analysis (填补部分)
-skip_dea: false
-skip_enrichment: false
-skip_rmats: false
-skip_variant_calling: false
-skip_wgcna: false
-read_length: 150
-species: "human"  # 选项: human, mouse
