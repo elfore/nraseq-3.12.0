@@ -1,6 +1,6 @@
 # Input and Output
-input: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq_subsequent/assets/samplesheet_nfcore.csv"
-outdir: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq_subsequent/results/20260423"
+input: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq-3.12.0/assets/samplesheet_nfcore.csv"
+outdir: "/mnt/gpfs/Users/yangjinxurong/projects/rnaseq-3.12.0/results/20240415"
 
 # Genome Resources
 fasta: "/mnt/gpfs/Dataset/05.genome/hg38/hg38.fa"
